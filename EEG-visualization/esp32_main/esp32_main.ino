@@ -20,7 +20,6 @@ byte ReadOneByte() {
 }
 
 void setup() {
-  // 고속 통신을 위해 115200 유지
   Serial.begin(115200); 
   mySerial.begin(EEG_BAUDRATE, SERIAL_8N1, rxPin, txPin);
 }
@@ -47,22 +46,19 @@ void loop() {
           while (i < pLength) {
             byte code = payloadData[i];
             
-            // 🌟 0x80 = 원시 뇌파(Raw Data) 신호 포착! (1초에 512번 들어옴)
             if (code == 0x80) { 
               byte vLength = payloadData[i+1];
               
-              // 2바이트 데이터를 10진수로 변환
               int rawVal = (payloadData[i+2] << 8) | payloadData[i+3];
-              if (rawVal > 32767) rawVal -= 65536; // 음수 처리
+              if (rawVal > 32767) rawVal -= 65536;
               
-              // 파이썬으로 쉴 새 없이 쏘기
               Serial.println(rawVal);
               
               i += 2 + vLength;
             } else if (code >= 0x80) {
-              i += 2 + payloadData[i+1]; // 멀티 바이트 데이터 건너뛰기
+              i += 2 + payloadData[i+1];
             } else {
-              i++; // 싱글 바이트 데이터 건너뛰기
+              i++;
             }
           }
         }
